@@ -60,13 +60,23 @@ def main():
     except Exception as e:
         print(f"  Warning: could not cancel orders: {e}")
 
-    try:
-        api.close_all_positions()
-        print("  [OK] All positions closed. Account is now flat.")
-        print("  [OK] Ready for demo -- run: python main.py --demo --interval 2")
-    except Exception as e:
-        print(f"  Error closing positions: {e}")
+    # Close each position individually — works outside market hours in paper trading
+    failed = []
+    for pos in positions:
+        try:
+            api.close_position(pos.symbol)
+            print(f"  [OK] {pos.symbol} closed.")
+        except Exception as e:
+            print(f"  [FAIL] {pos.symbol}: {e}")
+            failed.append(pos.symbol)
+
+    if failed:
+        print(f"\n  Could not close: {', '.join(failed)}")
+        print("  Tip: reset via Alpaca dashboard -> Paper Trading -> Reset Paper Account")
         sys.exit(1)
+    else:
+        print("\n  [OK] All positions closed. Account is now flat.")
+        print("  [OK] Ready for demo -- run: python main.py --demo --interval 2")
 
 if __name__ == '__main__':
     main()
