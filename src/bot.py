@@ -170,11 +170,12 @@ class TradingBot:
             # ── Trend-fail: price below MA50 ──────────────────────────────
             try:
                 warm_start = (date.today() - timedelta(days=MA50_WINDOW + 30)).strftime('%Y-%m-%d')
-                prices_df  = md.get_historical_data(ticker, start=warm_start)
+                warm_end   = date.today().strftime('%Y-%m-%d')
+                prices_df  = md.get_historical_data(ticker, start=warm_start, end=warm_end)
                 if prices_df is not None and len(prices_df) >= MA50_WINDOW:
                     ma50 = prices_df['Close'].rolling(MA50_WINDOW).mean().iloc[-1]
                     if current_price < ma50:
-                        print(f"  [TREND FAIL] {ticker}: ${current_price:.2f} < MA50 ${ma50:.2f} -- closing position.")
+                        print(f"  [SELL] {ticker}: price ${current_price:.2f} < MA50 ${ma50:.2f} — TREND FAIL, closing.")
                         self._close_position(ticker, qty, reason='TREND_FAIL')
                         continue
             except Exception as e:
@@ -186,11 +187,11 @@ class TradingBot:
                 if news:
                     result  = self.sentiment_agent.analyze_news(news, ticker=ticker)
                     score   = result['score'] if isinstance(result, dict) else float(result)
-                    print(f"  [MONITOR] {ticker}: sentiment score {score:.1f} "
-                          f"(sell floor {SENTIMENT_SELL_FLOOR})")
                     if score < SENTIMENT_SELL_FLOOR:
-                        print(f"  [SENTIMENT SELL] {ticker}: score {score:.1f} below floor -- closing.")
+                        print(f"  [SELL] {ticker}: sentiment {score:.1f} < floor {SENTIMENT_SELL_FLOOR} — SENTIMENT EXIT, closing.")
                         self._close_position(ticker, qty, reason='SENTIMENT_SELL')
+                    else:
+                        print(f"  [HOLD] {ticker}: sentiment {score:.1f}/10 ✓  trend ✓  — holding position.")
             except Exception as e:
                 print(f"  [MONITOR] Sentiment check failed for {ticker}: {e}")
 
@@ -388,6 +389,7 @@ def scan_for_entries(bot: TradingBot, ranked_candidates: list, sectors: dict, ma
             break
         result = bot.evaluate_ticker(candidate, sectors=sectors)
         if result:
+            print(f"  [BUY] {result['ticker']}: all 7 gates passed — entering position.")
             bot.execute_trade(
                 result['ticker'], result['price'],
                 sector=result.get('sector'), sectors=sectors
