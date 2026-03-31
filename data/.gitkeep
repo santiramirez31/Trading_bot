@@ -1,0 +1,3 @@
+# Sentiment cache files are stored here at runtime.
+# They are excluded from version control (.gitignore).
+# On first run, backtest_portfolio.py will build them automatically.

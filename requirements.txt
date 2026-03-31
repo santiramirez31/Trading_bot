@@ -1,0 +1,11 @@
+alpaca-trade-api
+yfinance
+transformers
+torch
+backtrader
+pandas
+numpy
+matplotlib
+lxml
+scipy
+requests
