@@ -1,7 +1,19 @@
 import os
+import warnings
 import pandas as pd
 import yfinance as yf
 from alpaca_trade_api.rest import REST, TimeFrame
+
+# Suppress yfinance calling deprecated pd.Timestamp.utcnow().
+# Must come AFTER pandas import because pandas registers an "always" filter
+# for Pandas4Warning at import time; inserting here puts our "ignore" at the
+# front of the filter chain so it wins.
+try:
+    from pandas.errors import Pandas4Warning
+    warnings.filterwarnings("ignore", category=Pandas4Warning)
+except ImportError:
+    pass
+warnings.filterwarnings("ignore", message=".*utcnow.*")
 
 
 class MarketDataHandler:

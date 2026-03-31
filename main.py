@@ -28,9 +28,8 @@ import os
 import argparse
 import warnings
 
-# Suppress noisy third-party deprecation warnings that we cannot fix
-warnings.filterwarnings('ignore', category=FutureWarning, module='yfinance')
-warnings.filterwarnings('ignore', message='.*utcnow.*', category=FutureWarning)
+# Suppress yfinance/pandas version mismatch warning (Timestamp.utcnow deprecated)
+warnings.filterwarnings("ignore", message=".*utcnow.*")
 
 # Ensure src/ is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
