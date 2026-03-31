@@ -41,7 +41,7 @@ warnings.filterwarnings("ignore", message=".*utcnow.*")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 
-def run_live(interval=15, max_positions=10, once=False):
+def run_live(interval=15, max_positions=10, once=False, demo=False):
     """Run the live paper-trading bot (src/bot.py __main__ logic)."""
     argv_backup = sys.argv[1:]
     sys.argv = [sys.argv[0],
@@ -49,6 +49,8 @@ def run_live(interval=15, max_positions=10, once=False):
                 '--max-positions', str(max_positions)]
     if once:
         sys.argv += ['--once']
+    if demo:
+        sys.argv += ['--demo']
 
     import runpy
     runpy.run_path(os.path.join(os.path.dirname(__file__), 'src', 'bot.py'),
@@ -108,6 +110,8 @@ Examples:
                         help='Max total open positions at any time (default: 10)')
     parser.add_argument('--once', action='store_true',
                         help='Live mode: run a single scan then exit (no continuous loop)')
+    parser.add_argument('--demo', action='store_true',
+                        help='Live mode: bypass market-hours check for demos outside trading hours')
     args = parser.parse_args()
 
     print('\n' + '=' * 65)
@@ -122,10 +126,11 @@ Examples:
             tickers = tickers[0].split(',')
         run_backtest(args.start, tickers=tickers, skip_cache=args.skip_cache_build)
     else:
-        print('\n  Mode: LIVE PAPER TRADING')
+        print('\n  Mode: LIVE PAPER TRADING' + (' [DEMO — market hours bypassed]' if args.demo else ''))
         run_live(interval=args.interval,
                  max_positions=args.max_positions,
-                 once=args.once)
+                 once=args.once,
+                 demo=args.demo)
 
 
 if __name__ == '__main__':

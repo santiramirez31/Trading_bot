@@ -412,6 +412,8 @@ if __name__ == '__main__':
                         help=f'Minutes between scans (default {SCAN_INTERVAL_MIN})')
     parser.add_argument('--once',        action='store_true',
                         help='Run a single scan then exit (no continuous loop)')
+    parser.add_argument('--demo',        action='store_true',
+                        help='Demo mode: bypass market-hours check (runs scans even when market is closed)')
     args = parser.parse_args()
 
     print('\n' + '='*65)
@@ -457,9 +459,12 @@ if __name__ == '__main__':
                 last_date_refreshed = date.today()
 
             if not bot.is_market_open():
-                print(f'  [{ts}] Market closed. Next check in {SLEEP_CLOSED_MIN} min...')
-                time.sleep(SLEEP_CLOSED_MIN * 60)
-                continue
+                if args.demo:
+                    print(f'  [{ts}] [DEMO] Market closed — bypassing for demo. Running scan...')
+                else:
+                    print(f'  [{ts}] Market closed. Next check in {SLEEP_CLOSED_MIN} min...')
+                    time.sleep(SLEEP_CLOSED_MIN * 60)
+                    continue
 
             print(f'\n  [{ts}] ── Market scan ──────────────────────────────────')
 
