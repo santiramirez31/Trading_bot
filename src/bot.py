@@ -339,31 +339,22 @@ class TradingBot:
 
 def build_ranked_candidates(md: MarketDataHandler, args) -> tuple[list, dict]:
     """Run C1 + C4/C5 screens and return (ranked_candidates, sectors)."""
-    print('\n  Fetching S&P 500 universe...')
     sp500_tickers, sectors = md.get_sp500_universe()
     if not sp500_tickers:
-        print('  Failed to fetch S&P 500 universe. Exiting.')
         return [], {}
-    print(f'S&P 500 universe: {len(sp500_tickers)} tickers across {len(set(sectors.values()))} sectors.')
 
-    print(f'\nCriterion 1 -- Quality screen: {len(sp500_tickers)} tickers '
-          f'| 10yr return > 8.5% AND Sharpe > 0...')
     quality_results = md.quality_screen_10yr(
         sp500_tickers, inflation_rate=args.inflation, min_excess_pct=0.05
     )
     if not quality_results:
-        print('\n  No stocks passed quality screen.')
         return [], sectors
-    print(f'  Criterion 1 complete: {len(quality_results)} / {len(sp500_tickers)} passed.')
 
-    print(f'\nCriteria 4+5 -- Liquidity & risk screen: {len(quality_results)} tickers...')
     ranked = md.screen_liquidity_risk_trend(
         quality_results,
         max_volatility=args.max_vol,
         max_drawdown=args.max_dd
     )
     if not ranked:
-        print('\n  No stocks passed liquidity/risk screen.')
         return [], sectors
 
     print(f'\n  Top 10 ranked candidates (by risk+trend score):')

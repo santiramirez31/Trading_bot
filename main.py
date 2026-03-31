@@ -27,6 +27,12 @@ import sys
 import os
 import argparse
 import warnings
+import multiprocessing
+
+# On Windows, HuggingFace tokenizers spawn worker processes that would re-run
+# this file as __main__ — freeze_support() + disabling parallelism prevents that.
+multiprocessing.freeze_support()
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 # Suppress yfinance/pandas version mismatch warning (Timestamp.utcnow deprecated)
 warnings.filterwarnings("ignore", message=".*utcnow.*")
