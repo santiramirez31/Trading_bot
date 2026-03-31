@@ -151,6 +151,7 @@ Startup
 |------|---------|-------------|
 | `--interval N` | 15 | Minutes between monitoring scans |
 | `--once` | off | Run a single scan then exit (no loop) |
+| `--demo` | off | **Bypass market-hours check** — runs scans even when the market is closed (for live demos and presentations) |
 | `--max-positions N` | 10 | Maximum total open positions at any time — if 2 are already open, the bot will open at most 8 more |
 | `--max-vol` | 0.35 | C5 volatility ceiling |
 | `--max-dd` | -0.30 | C5 drawdown floor |
@@ -159,9 +160,21 @@ Startup
 # Faster scans for demo — check every 5 minutes
 python main.py --interval 5
 
-# Single scan then exit (old one-shot behaviour)
+# Single scan then exit
 python main.py --once
+
+# ── Demo / presentation mode ──────────────────────────────────────────
+# Run outside NYSE market hours (evenings, weekends, classroom demos)
+python main.py --demo
+
+# Demo with faster scan cadence
+python main.py --demo --interval 2
+
+# Demo single scan then exit
+python main.py --demo --once
 ```
+
+> **Demo mode note:** When `--demo` is active, the bot skips the market-closed sleep and executes the full sentiment scan immediately. The header will show `[DEMO — market hours bypassed]` and each scan cycle will print `[DEMO] Market closed — bypassing for demo.` so it is clear to your audience that live trading is simulated outside market hours. Open positions and bracket orders in your Alpaca paper account are unaffected.
 
 ### Portfolio backtest (historical simulation)
 
