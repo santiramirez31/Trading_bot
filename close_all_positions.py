@@ -53,6 +53,10 @@ def main():
         print("  -- DRY RUN: no orders sent. Add --confirm to actually close. --")
         return
 
+    print("  NOTE: Alpaca paper trading only fills close orders during market hours")
+    print("        (9:30 AM - 4:00 PM ET). Orders submitted now will queue for next open.")
+    print("        For an instant reset, use: app.alpaca.markets -> Paper -> Reset Account")
+    print()
     print("  Closing all positions and cancelling open orders...")
     try:
         api.cancel_all_orders()
